@@ -5,7 +5,7 @@ import numpy as np
 from psd_tools import PSDImage
 
 
-def extract_layers_from_psd(psd_path: str, include_hidden: bool = False) -> Dict[str, Image.Image]:
+def extract_layers_from_psd(psd_path: str, include_hidden: bool = True) -> Dict[str, Image.Image]:
     """
     PSDファイルからレイヤーを抽出し、レイヤー名をキーとした辞書型配列を返す。
 
@@ -38,7 +38,7 @@ def extract_layers_from_psd(psd_path: str, include_hidden: bool = False) -> Dict
     return _extract_with_psd_tools(psd_path, include_hidden)
 
 
-def _extract_with_psd_tools(psd_path: str, include_hidden: bool = False) -> Dict[str, Image.Image]:
+def _extract_with_psd_tools(psd_path: str, include_hidden: bool = True) -> Dict[str, Image.Image]:
     """psd-toolsライブラリを使用してレイヤーを抽出"""
     try:
         psd = PSDImage.open(psd_path)
