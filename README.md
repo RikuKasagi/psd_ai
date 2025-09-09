@@ -7,15 +7,35 @@
 ```
 psd_ai/
 ├── README.md
+├── LICENSE                 # MIT License
+├── requirements.txt        # 依存関係
+├── setup.py               # パッケージ設定
+├── __init__.py            # パッケージエントリーポイント
 └── utils/
     └── psd_tools/
+        ├── __init__.py
         ├── psd_split.py    # PSDファイルからレイヤーを抽出
         └── psd_maker.py    # PNG画像からPSDファイルを作成
 ```
 
-## 🚀 セットアップ
+## 🚀 インストール
 
-### 必要なライブラリをインストール
+### 方法1: pip install（推奨）
+
+```bash
+pip install git+https://github.com/RikuKasagi/psd_ai.git
+```
+
+### 方法2: 手動インストール
+
+```bash
+git clone https://github.com/RikuKasagi/psd_ai.git
+cd psd_ai
+pip install -r requirements.txt
+pip install -e .
+```
+
+### 方法3: 依存ライブラリのみインストール
 
 ```bash
 pip install psd-tools pytoshop pillow numpy
@@ -48,12 +68,36 @@ PSDファイルを読み込み、各レイヤーをPNG画像として抽出し�
 
 ## 🔧 使用方法
 
+### パッケージとしてインポート（推奨）
+
+```python
+# インストール後、直接インポート可能
+from psd_ai import extract_layers_from_psd, save_images_as_psd
+
+# PSDファイルからレイヤーを抽出
+layers = extract_layers_from_psd("input.psd")
+
+# PNG画像からPSDファイルを作成
+save_images_as_psd(
+    image_paths=["bg.png", "fg.png"],
+    layer_names=["背景", "前景"],
+    save_path="output.psd"
+)
+```
+
+### 従来の方法（モジュール直接インポート）
+
+```python
+from utils.psd_tools.psd_split import extract_layers_from_psd
+from utils.psd_tools.psd_maker import save_images_as_psd
+```
+
 ### PSDファイルからレイヤーを抽出する
 
 #### ✅ 基本的な使い方
 
 ```python
-from utils.psd_tools.psd_split import extract_layers_from_psd
+from psd_ai import extract_layers_from_psd
 
 # PSDファイルからレイヤーを抽出（表示レイヤーのみ）
 psd_path = "input.psd"
@@ -71,7 +115,7 @@ for layer_name, image in layers.items():
 #### ✅ 非表示レイヤーも含めて抽出
 
 ```python
-from utils.psd_tools.psd_split import extract_layers_from_psd
+from psd_ai import extract_layers_from_psd
 
 # 非表示レイヤーも含めて抽出
 psd_path = "input.psd"
@@ -87,7 +131,7 @@ for layer_name, image in all_layers.items():
 
 ```python
 import os
-from utils.psd_tools.psd_split import extract_layers_from_psd
+from psd_ai import extract_layers_from_psd
 
 def save_all_layers(psd_path, output_dir, include_hidden=False):
     """PSDの全レイヤーを指定フォルダに保存"""
@@ -118,7 +162,7 @@ save_all_layers("input.psd", "all_layers", include_hidden=True)  # 全レイヤ�
 #### ✅ 基本的な使い方
 
 ```python
-from utils.psd_tools.psd_maker import save_images_as_psd
+from psd_ai import save_images_as_psd
 
 # 重ね合わせる画像のパス（下から順番）
 image_paths = [
@@ -157,6 +201,30 @@ layer_names = ["背景"]  # 1つしか指定していない
 # 結果: ["背景", "2", "3"] として処理されます
 save_images_as_psd(image_paths, layer_names, "output.psd")
 ```
+
+---
+
+## 🎯 **API リファレンス**
+
+### `extract_layers_from_psd(psd_path, include_hidden=False)`
+
+PSDファイルからレイヤーを抽出します。
+
+**パラメータ:**
+- `psd_path` (str): PSDファイルのパス
+- `include_hidden` (bool): 非表示レイヤーも含めるか（デフォルト: False）
+
+**戻り値:**
+- `Dict[str, Image.Image]`: レイヤー名をキーとした辞書
+
+### `save_images_as_psd(image_paths, layer_names, save_path)`
+
+PNG画像からPSDファイルを作成します。
+
+**パラメータ:**
+- `image_paths` (List[str]): PNG画像ファイルのパスリスト
+- `layer_names` (List[str]): レイヤー名のリスト
+- `save_path` (str): 保存先PSDファイルのパス
 
 ---
 
@@ -212,8 +280,7 @@ save_images_as_psd(image_paths, layer_names, "output.psd")
 
 ```python
 import os
-from utils.psd_tools.psd_split import extract_layers_from_psd
-from utils.psd_tools.psd_maker import save_images_as_psd
+from psd_ai import extract_layers_from_psd, save_images_as_psd
 
 # 1. PSDファイルからレイヤーを抽出（非表示レイヤーも含む）
 print("📂 PSDファイルからレイヤーを抽出中...")
@@ -253,5 +320,21 @@ print("✅ 処理完了!")
 - **作成**: `pytoshop`ライブラリを使用（機能充実）
 - **画像処理**: `PIL (Pillow)`を使用
 - **数値処理**: `NumPy`を使用
+- **ライセンス**: MIT License
+- **Python**: 3.8+ 対応
+
+## 🤝 コントリビューション
+
+1. このリポジトリをフォーク
+2. フィーチャーブランチを作成 (`git checkout -b feature/amazing-feature`)
+3. 変更をコミット (`git commit -m 'Add amazing feature'`)
+4. ブランチにプッシュ (`git push origin feature/amazing-feature`)
+5. Pull Request を作成
+
+## 📄 ライセンス
+
+このプロジェクトは MIT License の下で公開されています。詳細は [LICENSE](LICENSE) ファイルをご覧ください。
+
+---
 
 このツールは将来的に大きなシステムに組み込まれる予定ですが、現在は個別の関数として利用できます。
