@@ -1,0 +1,39 @@
+# クラス定義設定
+# 色→クラスIDのマッピング定義
+
+# バージョン情報
+version: "1.0"
+description: "Dataset generation class definitions"
+
+# 背景クラス
+background:
+  id: 0
+  name: "background"
+  color: [0, 0, 0]  # 黒または透明
+  alpha_threshold: 128  # アルファ値がこれ以下は背景扱い
+
+# 前景クラス定義
+classes:
+  - id: 1
+    name: "class1"
+    color: [255, 0, 0]  # 赤
+    description: "First class"
+  
+  - id: 2
+    name: "class2" 
+    color: [0, 255, 0]  # 緑
+    description: "Second class"
+    
+  - id: 3
+    name: "class3"
+    color: [0, 0, 255]  # 青
+    description: "Third class"
+
+# 将来の拡張用設定
+matching:
+  mode: "exact"  # exact, threshold, clustering
+  color_space: "RGB"  # RGB, LAB, HSV
+  threshold: 0  # 色差しきい値（thresholdモード用）
+  clustering:
+    method: "kmeans"  # 自動クラスタリング用
+    max_clusters: 10

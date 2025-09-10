@@ -1,0 +1,62 @@
+# データセット生成パイプライン設定
+
+# バージョン情報
+version: "1.0"
+description: "Dataset generation pipeline configuration"
+
+# 入力設定
+input:
+  required_layers: ["original", "mask", "refined"]
+  image_format: "PNG"
+
+# マスク統合設定
+mask_integration:
+  priority_order: ["mask", "refined"]  # mask優先
+  background_handling: "transparent"  # transparent, color
+  background_color: [0, 0, 0]  # 背景色指定時
+
+# タイル分割設定
+tiling:
+  tile_size: 512  # 正方形タイルサイズ
+  overlap: 128    # オーバーラップピクセル数
+  stride: null    # 自動計算（tile_size - overlap）
+  padding:
+    mode: "constant"  # constant, reflect, symmetric
+    value: 0         # パディング値
+  min_foreground_ratio: 0.0  # 前景ピクセル最小比率（0.0=全タイル保持）
+
+# データ分割設定
+data_split:
+  train_ratio: 0.8
+  val_ratio: 0.1
+  test_ratio: 0.1
+  seed: 42  # 再現性のためのシード値
+  shuffle: true
+  stratify: false  # 将来のクラス分布バランス用
+
+# 出力設定
+output:
+  base_path: "./dataset"
+  image_format: "PNG"
+  mask_format: "PNG"
+  compression: 6  # PNG圧縮レベル（0-9）
+  
+# ログ設定
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file_rotation: true
+  max_size_mb: 10
+  backup_count: 5
+
+# 処理設定
+processing:
+  batch_size: 100  # バッチ処理サイズ
+  parallel: false  # 並列処理（将来用）
+  memory_limit_gb: 4  # メモリ使用制限
+
+# 品質管理設定
+quality:
+  validate_inputs: true
+  validate_outputs: true
+  generate_previews: false  # プレビュー画像生成
+  max_tile_count: 10000    # 最大タイル数制限
