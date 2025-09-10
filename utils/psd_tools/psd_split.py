@@ -1,8 +1,46 @@
 import os
+import re
 from typing import Dict
 from PIL import Image
 import numpy as np
 from psd_tools import PSDImage
+
+
+def clean_layer_name(layer_name: str) -> str:
+    """
+    レイヤー名から制御文字を除去し、クリーンな文字列を返す。
+    
+    Parameters
+    ----------
+    layer_name : str
+        元のレイヤー名
+        
+    Returns
+    -------
+    str
+        制御文字が除去されたクリーンなレイヤー名
+    """
+    if not layer_name:
+        return "Unnamed Layer"
+    
+    # 制御文字（ASCII 0-31, 127）を除去
+    # ただし、タブ(\t)、改行(\n, \r)は空白に置換
+    cleaned = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', layer_name)
+    
+    # タブと改行を空白に置換
+    cleaned = re.sub(r'[\t\n\r]', ' ', cleaned)
+    
+    # 連続する空白を単一の空白に置換
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    
+    # 前後の空白を除去
+    cleaned = cleaned.strip()
+    
+    # 空文字列になった場合のフォールバック
+    if not cleaned:
+        return "Unnamed Layer"
+    
+    return cleaned
 
 
 def extract_layers_from_psd(psd_path: str, include_hidden: bool = True) -> Dict[str, Image.Image]:
@@ -51,7 +89,8 @@ def _extract_with_psd_tools(psd_path: str, include_hidden: bool = True) -> Dict[
         
         def process_layer(layer, layer_path=""):
             """レイヤーを再帰的に処理（グループレイヤー対応）"""
-            layer_name = layer.name if layer.name else "Unnamed Layer"
+            raw_layer_name = layer.name if layer.name else "Unnamed Layer"
+            layer_name = clean_layer_name(raw_layer_name)  # 制御文字を除去
             full_name = f"{layer_path}/{layer_name}" if layer_path else layer_name
             
             # グループレイヤーの場合は子レイヤーを処理
@@ -163,7 +202,7 @@ if __name__ == "__main__":
             
             # 各レイヤーをPNGとして保存
             for layer_name, image in layers.items():
-                # ファイル名として使えない文字を置換（スペースは保持）
+                # ファイル名として使えない文字を置換（制御文字は既に除去済み）
                 safe_filename = "".join(c if c.isalnum() or c in (' ', '-', '_') else '_' for c in layer_name)
                 safe_filename = safe_filename.strip()  # 前後の空白のみ除去
                 if not safe_filename:
