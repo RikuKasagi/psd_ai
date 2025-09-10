@@ -3,6 +3,7 @@
 画像・マスクのスケール/タイル分割（横長画像の縦向き変換、グリッド分割対応）
 """
 
+import time  # タイミング計測用に追加
 import numpy as np
 from typing import Dict, List, Tuple, Optional
 from PIL import Image, ImageOps
@@ -118,37 +119,64 @@ class Tiler:
             タイル情報のリスト
             各要素: {'image': Image, 'mask': np.ndarray, 'position': (row, col), 'index': int}
         """
+        total_start = time.time()
+        self.logger.info(f"🧩 タイル生成開始 (元画像: {original.size}, マスク: {index_mask.shape})")
+        
         # 1. 横長画像の縦向き変換
+        orient_start = time.time()
+        self.logger.info("🔄 画像向き調整中...")
         oriented_image = self._auto_orient_image(original)
         
         # マスクも同様に変換
         if self.auto_orient and original.size[0] > original.size[1]:
             oriented_mask = np.rot90(index_mask, k=1)  # 90度回転
+            self.logger.info("↪️ 横長画像を縦向きに変換")
         else:
             oriented_mask = index_mask
+            self.logger.info("📐 画像向きは維持")
+        orient_time = time.time() - orient_start
+        self.logger.info(f"✅ 画像向き調整完了: {orient_time:.3f}秒 (調整後: {oriented_image.size})")
         
         # サイズ検証
         if oriented_image.size != (oriented_mask.shape[1], oriented_mask.shape[0]):
             raise ValueError(f"画像とマスクのサイズが不一致: {oriented_image.size} != {oriented_mask.shape[::-1]}")
         
         # 2. グリッド分割用のターゲットサイズ計算
+        resize_start = time.time()
+        self.logger.info("📏 リサイズ処理開始...")
         rows, cols = self.grid_size
         target_width, target_height = self._calculate_target_size(rows, cols)
         
-        self.logger.info(f"タイル生成開始: 画像サイズ={oriented_image.size}, グリッド={rows}x{cols}, タイルサイズ={self.tile_size}, オーバーラップ={self.overlap}")
-        self.logger.info(f"ターゲットサイズ: {target_width}x{target_height}")
+        self.logger.info(f"🎯 グリッド設定: {rows}x{cols}, タイルサイズ={self.tile_size}, オーバーラップ={self.overlap}")
+        self.logger.info(f"📐 ターゲットサイズ: {target_width}x{target_height}")
         
         # 3. リサイズ
         resized_image = self._resize_for_grid(oriented_image, (target_width, target_height))
         resized_mask = self._resize_mask_for_grid(oriented_mask, (target_width, target_height))
+        resize_time = time.time() - resize_start
+        self.logger.info(f"✅ リサイズ完了: {resize_time:.3f}秒")
         
         # 4. グリッド分割実行
+        split_start = time.time()
+        self.logger.info("✂️ グリッド分割開始...")
         tiles = self._split_into_grid(resized_image, resized_mask, rows, cols)
+        split_time = time.time() - split_start
+        self.logger.info(f"✅ グリッド分割完了: {split_time:.3f}秒 (生成タイル: {len(tiles)})")
         
         # 5. フィルタリング
+        filter_start = time.time()
+        self.logger.info("🔍 タイルフィルタリング開始...")
         filtered_tiles = self._filter_tiles(tiles)
+        filter_time = time.time() - filter_start
+        self.logger.info(f"✅ フィルタリング完了: {filter_time:.3f}秒 (有効タイル: {len(filtered_tiles)}/{len(tiles)})")
         
-        self.logger.info(f"タイル生成完了: {len(filtered_tiles)}個のタイルを生成（元:{len(tiles)}個）")
+        total_time = time.time() - total_start
+        self.logger.info(f"🎯 タイル生成総時間: {total_time:.3f}秒")
+        self.logger.info(f"📊 詳細時間:")
+        self.logger.info(f"  - 画像向き調整: {orient_time:.3f}秒 ({orient_time/total_time*100:.1f}%)")
+        self.logger.info(f"  - リサイズ処理: {resize_time:.3f}秒 ({resize_time/total_time*100:.1f}%)")
+        self.logger.info(f"  - グリッド分割: {split_time:.3f}秒 ({split_time/total_time*100:.1f}%)")
+        self.logger.info(f"  - フィルタリング: {filter_time:.3f}秒 ({filter_time/total_time*100:.1f}%)")
         
         return filtered_tiles
     

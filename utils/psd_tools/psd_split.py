@@ -124,7 +124,7 @@ def _extract_with_psd_tools(psd_path: str, include_hidden: bool = True) -> Dict[
                             except Exception as e:
                                 print(f"⚠️ レイヤー '{full_name}' でtopil()エラー: {e}")
                         
-                        # 2. topil()が失敗した場合、composite()を試行（表示レイヤーのみ有効）
+                        # 2. topil()が失敗した場合のみcomposite()を試行
                         if layer_img is None and hasattr(layer, 'composite') and is_visible:
                             try:
                                 layer_img = layer.composite()
@@ -133,9 +133,6 @@ def _extract_with_psd_tools(psd_path: str, include_hidden: bool = True) -> Dict[
                         
                         # 画像データが取得できた場合の処理
                         if layer_img and layer_img.size[0] > 0 and layer_img.size[1] > 0:
-                            # キャンバス全体サイズの画像を作成
-                            canvas_img = Image.new('RGBA', (canvas_width, canvas_height), (0, 0, 0, 0))
-                            
                             # レイヤーの位置を取得
                             bbox = getattr(layer, 'bbox', (0, 0, layer_img.size[0], layer_img.size[1]))
                             if isinstance(bbox, tuple) and len(bbox) >= 4:
@@ -143,15 +140,15 @@ def _extract_with_psd_tools(psd_path: str, include_hidden: bool = True) -> Dict[
                             else:
                                 left, top = 0, 0
                             
-                            # レイヤーをキャンバスの正しい位置に配置
+                            # RGBAモード変換（一度だけ）
                             if layer_img.mode != 'RGBA':
                                 layer_img = layer_img.convert('RGBA')
                             
-                            canvas_img.paste(layer_img, (left, top), layer_img)
+                            # キャンバス全体サイズの画像を作成
+                            canvas_img = Image.new('RGBA', (canvas_width, canvas_height), (0, 0, 0, 0))
                             
-                            # RGBAモードのまま保存
-                            if canvas_img.mode != 'RGBA':
-                                canvas_img = canvas_img.convert('RGBA')
+                            # レイヤーをキャンバスの正しい位置に配置（最適化：条件統合）
+                            canvas_img.paste(layer_img, (left, top), layer_img)
                             
                             layers_dict[full_name] = canvas_img
                             print(f"✅ レイヤー '{full_name}' を抽出しました ({visibility_status}) (キャンバスサイズ: {canvas_width}x{canvas_height}, レイヤー実サイズ: {layer_img.size[0]}x{layer_img.size[1]})")

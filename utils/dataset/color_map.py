@@ -59,6 +59,12 @@ class ColorMapper:
         self.background_id = bg['id']
         self.alpha_threshold = bg.get('alpha_threshold', 128)
         self.matching_mode = self.config.get('matching', {}).get('mode', 'exact')
+        
+        # 高速処理用の事前計算済みマッピング
+        self.color_map_int = {}
+        for (r, g, b), class_id in self.color_to_id.items():
+            color_int = (r << 16) + (g << 8) + b
+            self.color_map_int[color_int] = class_id
     
     def map_color_to_id(self, color: Tuple[int, int, int], alpha: Optional[int] = None) -> int:
         """
@@ -94,7 +100,7 @@ class ColorMapper:
     
     def convert_image_to_index_mask(self, image: Image.Image) -> np.ndarray:
         """
-        画像をインデックスマスクに変換
+        画像をインデックスマスクに変換（超高速版）
         
         Parameters
         ----------
@@ -109,25 +115,37 @@ class ColorMapper:
         # RGBA変換
         if image.mode != 'RGBA':
             if image.mode == 'RGB':
-                # RGB画像の場合、アルファチャンネルを追加
                 image = image.convert('RGBA')
             else:
                 raise ValueError(f"サポートされていない画像モード: {image.mode}")
         
         # NumPy配列に変換
-        img_array = np.array(image)  # (H, W, 4)
+        img_array = np.array(image, dtype=np.uint8)  # (H, W, 4)
         height, width = img_array.shape[:2]
         
         # インデックスマスク初期化
         index_mask = np.full((height, width), self.background_id, dtype=np.uint8)
         
-        # ピクセルごとにマッピング
-        for y in range(height):
-            for x in range(width):
-                r, g, b, a = img_array[y, x]
-                color = (int(r), int(g), int(b))
-                class_id = self.map_color_to_id(color, int(a))
-                index_mask[y, x] = class_id
+        # アルファチャンネル処理
+        alpha_channel = img_array[:, :, 3]
+        opaque_mask = alpha_channel > self.alpha_threshold
+        
+        if not np.any(opaque_mask):
+            return index_mask  # 全て透明
+        
+        # RGB部分のみ抽出
+        rgb_array = img_array[:, :, :3]
+        
+        # 32bit整数への変換で高速比較（RGB -> single integer）
+        # R*256^2 + G*256 + B の形式
+        rgb_as_int = (rgb_array[:, :, 0].astype(np.uint32) << 16) + \
+                     (rgb_array[:, :, 1].astype(np.uint32) << 8) + \
+                     rgb_array[:, :, 2].astype(np.uint32)
+        
+        # 事前計算済みマッピングテーブルを使用
+        for color_int, class_id in self.color_map_int.items():
+            color_match = (rgb_as_int == color_int) & opaque_mask
+            index_mask[color_match] = class_id
         
         return index_mask
     

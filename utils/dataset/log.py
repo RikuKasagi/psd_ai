@@ -47,7 +47,12 @@ def setup_logger(
     
     # ロガー作成
     logger = logging.getLogger(name)
-    logger.setLevel(getattr(logging, level.upper()))
+    
+    # レベル設定（文字列または数値に対応）
+    if isinstance(level, str):
+        logger.setLevel(getattr(logging, level.upper()))
+    else:
+        logger.setLevel(level)
     
     # 既存のハンドラーをクリア
     logger.handlers.clear()

@@ -85,6 +85,7 @@ class BatchPipeline:
             
             # レイヤー抽出
             layers = extract_layers_from_psd(str(psd_file), include_hidden=include_hidden)
+            self.logger.info(f"  抽出レイヤー: {len(layers)}個")
             
             # タイル生成（分割はしない）
             tiles = self._generate_tiles_only(layers, psd_file.stem)
@@ -138,11 +139,13 @@ class BatchPipeline:
         color_mapper = ColorMapper(self.classes_config_path)
         mask_builder = MaskBuilder(color_mapper)
         index_mask = mask_builder.build_index_mask(layers)
+        print("マスク統合完了")
         
         # 2. タイル分割
         tiler = Tiler(self.config['tiling'])
         tiles = tiler.generate_tiles(layers['original'], index_mask)
-        
+        print("タイル生成完了")
+
         # 3. タイル情報にソース名を追加
         for i, tile in enumerate(tiles):
             tile['source_psd'] = source_name

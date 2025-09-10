@@ -38,7 +38,7 @@ class IOUtils:
         image: Image.Image, 
         filepath: str, 
         format: str = "PNG",
-        compression: int = 6
+        compression: int = 1  # 高速化：1に変更（デフォルト6→1）
     ) -> bool:
         """
         画像を保存
@@ -66,7 +66,7 @@ class IOUtils:
             # 保存オプション
             save_kwargs = {}
             if format.upper() == "PNG":
-                save_kwargs['optimize'] = True
+                save_kwargs['optimize'] = False  # 最適化無効で高速化
                 save_kwargs['compress_level'] = compression
             
             image.save(filepath, format=format.upper(), **save_kwargs)
@@ -80,7 +80,7 @@ class IOUtils:
     def save_index_mask(
         mask: np.ndarray, 
         filepath: str,
-        compression: int = 6
+        compression: int = 1  # 高速化：1に変更
     ) -> bool:
         """
         インデックスマスクを保存
@@ -111,7 +111,7 @@ class IOUtils:
             image.save(
                 filepath, 
                 format="PNG", 
-                optimize=True, 
+                optimize=False,  # 最適化無効で高速化
                 compress_level=compression
             )
             return True

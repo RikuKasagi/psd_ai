@@ -3,6 +3,7 @@
 mask優先でrefinedをマージしたインデックスマスクを生成
 """
 
+import time  # タイミング計測用に追加
 import numpy as np
 from typing import Dict, Optional
 from PIL import Image
@@ -45,6 +46,8 @@ class MaskBuilder:
         np.ndarray
             インデックスマスク（H, W）
         """
+        build_start = time.time()
+        
         if priority_order is None:
             priority_order = ["mask", "refined"]
         
@@ -56,20 +59,38 @@ class MaskBuilder:
         width, height = original.size
         
         # インデックスマスクを初期化（背景クラス）
+        init_start = time.time()
         index_mask = np.full((height, width), self.color_mapper.background_id, dtype=np.uint8)
+        init_time = time.time() - init_start
         
-        self.logger.info(f"インデックスマスク初期化: {width}x{height}, 背景ID={self.color_mapper.background_id}")
+        self.logger.info(f"🎭 マスク初期化: {width}x{height}, 背景ID={self.color_mapper.background_id} ({init_time:.3f}秒)")
         
         # 優先順位に従ってレイヤーを統合
         processed_layers = []
+        merge_times = {}
         for layer_name in reversed(priority_order):  # 低優先度から処理
             if layer_name in layers:
+                merge_start = time.time()
                 layer_img = layers[layer_name]
+                self.logger.info(f"🔄 レイヤー '{layer_name}' マージ開始 (サイズ: {layer_img.size})")
                 self._merge_layer_to_mask(index_mask, layer_img, layer_name)
+                merge_time = time.time() - merge_start
+                merge_times[layer_name] = merge_time
                 processed_layers.append(layer_name)
+                self.logger.info(f"✅ レイヤー '{layer_name}' マージ完了: {merge_time:.3f}秒")
         
         # 統計情報をログ出力
+        stats_start = time.time()
         self._log_mask_stats(index_mask, processed_layers)
+        stats_time = time.time() - stats_start
+        
+        total_time = time.time() - build_start
+        self.logger.info(f"🎯 マスク統合総時間: {total_time:.3f}秒")
+        self.logger.info(f"📊 詳細時間:")
+        self.logger.info(f"  - 初期化: {init_time:.3f}秒")
+        for layer_name, merge_time in merge_times.items():
+            self.logger.info(f"  - {layer_name}マージ: {merge_time:.3f}秒")
+        self.logger.info(f"  - 統計出力: {stats_time:.3f}秒")
         
         return index_mask
     
