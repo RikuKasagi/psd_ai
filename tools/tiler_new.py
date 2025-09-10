@@ -40,8 +40,7 @@ class Tiler:
         self.min_foreground_ratio = config.get('min_foreground_ratio', 0.0)
         
         # stride計算（オーバーラップを考慮）
-        # オーバーラップは上下左右に適用されるため、新規部分 = tile_size - (overlap * 2)
-        self.stride = self.tile_size - (self.overlap * 2)
+        self.stride = self.tile_size - self.overlap
         
         # 検証
         self._validate_config()
@@ -54,11 +53,8 @@ class Tiler:
         if self.overlap < 0:
             raise ValueError(f"overlap must be non-negative: {self.overlap}")
         
-        if self.overlap * 2 >= self.tile_size:
-            raise ValueError(f"overlap * 2 must be less than tile_size: {self.overlap * 2} >= {self.tile_size}")
-        
-        if self.stride <= 0:
-            raise ValueError(f"stride must be positive (tile_size - overlap*2): {self.stride}")
+        if self.overlap >= self.tile_size:
+            raise ValueError(f"overlap must be less than tile_size: {self.overlap} >= {self.tile_size}")
         
         if len(self.grid_size) != 2 or any(x <= 0 for x in self.grid_size):
             raise ValueError(f"grid_size must be [rows, cols] with positive values: {self.grid_size}")

@@ -8,8 +8,8 @@ from typing import Dict, Optional
 from PIL import Image
 import logging
 
-from ..dataset.color_map import ColorMapper
-from ..dataset.log import get_logger
+from utils.dataset.color_map import ColorMapper
+from utils.dataset.log import get_logger
 
 
 class MaskBuilder:

@@ -9,8 +9,8 @@ from typing import Dict, List, Tuple, Optional
 import logging
 from pathlib import Path
 
-from ..dataset.log import get_logger
-from ..dataset.io_utils import IOUtils
+from utils.dataset.log import get_logger
+from utils.dataset.io_utils import IOUtils
 
 
 class Splitter:
@@ -191,7 +191,8 @@ class Splitter:
         
         for i, tile_info in enumerate(tiles):
             # ファイル名生成（分割名を含む）
-            filename = IOUtils.generate_filename(f"{split_name}_{i:06d}", 0, "png")
+            # シンプルな通し番号のファイル名生成
+            filename = f"{i+1:05d}.png"  # 00001.png, 00002.png, ...
             
             # 画像保存
             image_path = images_dir / filename

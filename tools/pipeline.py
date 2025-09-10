@@ -12,7 +12,7 @@ import logging
 from .mask_builder import MaskBuilder
 from .tiler import Tiler
 from .splitter import Splitter
-from ..dataset import (
+from utils.dataset import (
     setup_logger, get_logger, ColorMapper, IOUtils, 
     Validator, ManifestGenerator
 )
@@ -209,7 +209,9 @@ class DatasetPipeline:
         
         # 統計をログ出力
         stats = self.tiler.get_statistics(tiles)
-        self.logger.info(f"タイル統計: {stats['total_tiles']}個生成, パディング含む: {stats['padded_tiles']}個")
+        self.logger.info(f"タイル統計: {stats['total_tiles']}個生成, グリッド: {stats.get('grid_size', 'N/A')}")
+        if 'avg_foreground_ratio' in stats:
+            self.logger.info(f"前景比率: 平均{stats['avg_foreground_ratio']:.3f}, 範囲[{stats['min_foreground_ratio']:.3f}-{stats['max_foreground_ratio']:.3f}]")
         
         return tiles
     
@@ -303,12 +305,22 @@ class DatasetPipeline:
         
         # 保存
         manifest_dir = Path(output_path).parent / 'manifests'
+        self.logger.info(f"マニフェスト保存開始: {manifest_dir}")
         success = self.manifest.save(str(manifest_dir))
         
         if success:
             self.logger.info(f"マニフェスト保存完了: {manifest_dir}")
         else:
-            self.logger.error("マニフェスト保存失敗")
+            self.logger.error(f"マニフェスト保存失敗: {manifest_dir}")
+            # 詳細なデバッグ情報
+            self.logger.error(f"出力パス: {output_path}")
+            self.logger.error(f"マニフェストディレクトリ: {manifest_dir}")
+            self.logger.error(f"ディレクトリ存在確認: {manifest_dir.exists()}")
+            try:
+                manifest_dir.mkdir(parents=True, exist_ok=True)
+                self.logger.info(f"ディレクトリ作成成功: {manifest_dir}")
+            except Exception as e:
+                self.logger.error(f"ディレクトリ作成失敗: {e}")
         
         return {'saved': success, 'path': str(manifest_dir)}
     

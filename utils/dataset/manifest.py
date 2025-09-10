@@ -142,31 +142,46 @@ class ManifestGenerator:
     def save(self, filepath: str) -> bool:
         """マニフェストを保存"""
         try:
-            # ディレクトリ作成
-            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            # パスの正規化
+            filepath = os.path.abspath(filepath)
             
-            # ファイル名に生成時刻を含める
-            if self.manifest['generated_at']:
-                timestamp = self.manifest['generated_at'].replace(':', '').replace('-', '').split('T')[0]
-                base_name = f"manifest_{timestamp}"
-            else:
-                base_name = "manifest"
-            
-            # 実際のファイルパス
-            if not filepath.endswith('.json'):
-                filepath = f"{filepath}/{base_name}.json"
-            elif 'manifest_' not in filepath:
-                dir_path = os.path.dirname(filepath)
+            # ディレクトリパスの確定
+            if os.path.isdir(filepath) or not filepath.endswith('.json'):
+                # ディレクトリパスまたは拡張子なしの場合
+                dir_path = filepath if os.path.isdir(filepath) else os.path.dirname(filepath)
+                
+                # ファイル名に生成時刻を含める
+                if self.manifest['generated_at']:
+                    timestamp = self.manifest['generated_at'].replace(':', '').replace('-', '').split('T')[0]
+                    base_name = f"manifest_{timestamp}"
+                else:
+                    base_name = "manifest"
+                
                 filepath = os.path.join(dir_path, f"{base_name}.json")
+            
+            # ディレクトリ作成
+            dir_path = os.path.dirname(filepath)
+            os.makedirs(dir_path, exist_ok=True)
+            
+            # 保存前の検証
+            if not self.manifest:
+                raise ValueError("マニフェストデータが空です")
             
             # 保存
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(self.manifest, f, indent=2, ensure_ascii=False, default=str)
             
+            # 保存確認
+            if not os.path.exists(filepath):
+                raise RuntimeError(f"ファイル保存後に存在確認失敗: {filepath}")
+            
+            print(f"マニフェスト保存成功: {filepath}")
             return True
             
         except Exception as e:
+            import traceback
             print(f"マニフェスト保存エラー: {e}")
+            print(f"詳細: {traceback.format_exc()}")
             return False
     
     def load(self, filepath: str) -> bool:

@@ -1,6 +1,11 @@
 # Test files
 utils/psd_tools/test_files/
 
+# Generated dataset outputs
+dataset/
+*.psd
+*.psb
+
 # Python
 __pycache__/
 *.py[cod]

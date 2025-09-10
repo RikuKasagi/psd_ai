@@ -1,0 +1,281 @@
+{
+  "version": "1.0",
+  "generated_at": "2025-09-10T18:27:12.305266",
+  "config": {
+    "tiling": {
+      "tile_size": 512,
+      "grid_size": [
+        18,
+        5
+      ],
+      "overlap": 128,
+      "auto_orient": true,
+      "padding": {
+        "mode": "constant",
+        "value": 0
+      },
+      "min_foreground_ratio": 0.0
+    },
+    "data_split": {
+      "train_ratio": 0.8,
+      "val_ratio": 0.1,
+      "test_ratio": 0.1,
+      "seed": 42,
+      "shuffle": true,
+      "stratify": false
+    },
+    "output": {
+      "base_path": "./dataset",
+      "image_format": "PNG",
+      "mask_format": "PNG",
+      "compression": 6
+    },
+    "quality": {
+      "validate_inputs": true,
+      "validate_outputs": true,
+      "generate_previews": false,
+      "max_tile_count": 10000
+    }
+  },
+  "input": {
+    "source_path": null,
+    "layers": [
+      "original",
+      "mask",
+      "refined"
+    ],
+    "layer_info": {
+      "original": {
+        "size": [
+          4032,
+          3024
+        ],
+        "mode": "RGBA",
+        "channels": 4
+      },
+      "mask": {
+        "size": [
+          4032,
+          3024
+        ],
+        "mode": "RGBA",
+        "channels": 4
+      },
+      "refined": {
+        "size": [
+          4032,
+          3024
+        ],
+        "mode": "RGBA",
+        "channels": 4
+      }
+    }
+  },
+  "processing": {
+    "original_size": [
+      4032,
+      3024
+    ],
+    "tile_size": 512,
+    "overlap": 128,
+    "stride": 256,
+    "total_tiles_generated": 90,
+    "grid_size": [
+      15,
+      11
+    ]
+  },
+  "output": {
+    "dataset_path": "./dataset",
+    "splits": {
+      "train": {
+        "count": 72,
+        "files": [
+          "train_000000_000000.png",
+          "train_000001_000000.png",
+          "train_000002_000000.png",
+          "train_000003_000000.png",
+          "train_000004_000000.png",
+          "train_000005_000000.png",
+          "train_000006_000000.png",
+          "train_000007_000000.png",
+          "train_000008_000000.png",
+          "train_000009_000000.png"
+        ],
+        "total_files": 72
+      },
+      "val": {
+        "count": 9,
+        "files": [
+          "val_000000_000000.png",
+          "val_000001_000000.png",
+          "val_000002_000000.png",
+          "val_000003_000000.png",
+          "val_000004_000000.png",
+          "val_000005_000000.png",
+          "val_000006_000000.png",
+          "val_000007_000000.png",
+          "val_000008_000000.png"
+        ],
+        "total_files": 9
+      },
+      "test": {
+        "count": 9,
+        "files": [
+          "test_000000_000000.png",
+          "test_000001_000000.png",
+          "test_000002_000000.png",
+          "test_000003_000000.png",
+          "test_000004_000000.png",
+          "test_000005_000000.png",
+          "test_000006_000000.png",
+          "test_000007_000000.png",
+          "test_000008_000000.png"
+        ],
+        "total_files": 9
+      }
+    }
+  },
+  "stats": {
+    "tiles": {
+      "total_tiles": 90,
+      "grid_size": [
+        18,
+        5
+      ],
+      "tile_size": 512,
+      "overlap": 128,
+      "stride": 256,
+      "avg_foreground_ratio": 0.023022630479600695,
+      "min_foreground_ratio": 0.0,
+      "max_foreground_ratio": 0.11320114135742188
+    },
+    "splits": {
+      "total_files": 90,
+      "splits": {
+        "train": {
+          "count": 72,
+          "percentage": 80.0,
+          "files_sample": [
+            "train_000000_000000.png",
+            "train_000001_000000.png",
+            "train_000002_000000.png",
+            "train_000003_000000.png",
+            "train_000004_000000.png"
+          ]
+        },
+        "val": {
+          "count": 9,
+          "percentage": 10.0,
+          "files_sample": [
+            "val_000000_000000.png",
+            "val_000001_000000.png",
+            "val_000002_000000.png",
+            "val_000003_000000.png",
+            "val_000004_000000.png"
+          ]
+        },
+        "test": {
+          "count": 9,
+          "percentage": 10.0,
+          "files_sample": [
+            "test_000000_000000.png",
+            "test_000001_000000.png",
+            "test_000002_000000.png",
+            "test_000003_000000.png",
+            "test_000004_000000.png"
+          ]
+        }
+      },
+      "ratios": {
+        "expected": {
+          "train": 0.8,
+          "val": 0.1,
+          "test": 0.1
+        },
+        "actual": {
+          "train": 0.8,
+          "val": 0.1,
+          "test": 0.1
+        }
+      },
+      "seed": 42,
+      "shuffle": true
+    },
+    "output": {
+      "train_count": 72,
+      "val_count": 9,
+      "test_count": 9,
+      "missing_masks": [],
+      "size_mismatches": [],
+      "format_issues": []
+    }
+  },
+  "validation": {
+    "input": {
+      "layer_validation": {
+        "valid": true,
+        "issues": []
+      },
+      "config_validation": {
+        "valid": true,
+        "issues": []
+      },
+      "mask_validation": {
+        "valid": true,
+        "issues": []
+      },
+      "overall_valid": true
+    },
+    "output": {
+      "valid": true,
+      "issues": [],
+      "stats": {
+        "train_count": 72,
+        "val_count": 9,
+        "test_count": 9,
+        "missing_masks": [],
+        "size_mismatches": [],
+        "format_issues": []
+      }
+    }
+  },
+  "class_mapping": {
+    "0": {
+      "name": "background",
+      "color": [
+        0,
+        0,
+        0
+      ],
+      "alpha_threshold": 128
+    },
+    "1": {
+      "name": "class1",
+      "color": [
+        255,
+        0,
+        0
+      ],
+      "description": "First class"
+    },
+    "2": {
+      "name": "class2",
+      "color": [
+        0,
+        255,
+        0
+      ],
+      "description": "Second class"
+    },
+    "3": {
+      "name": "class3",
+      "color": [
+        0,
+        0,
+        255
+      ],
+      "description": "Third class"
+    }
+  }
+}

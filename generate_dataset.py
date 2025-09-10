@@ -5,10 +5,12 @@ PSDレイヤーからデータセット生成パイプラインを実行
 
 import argparse
 import sys
+import os
 from pathlib import Path
 
 # プロジェクトパスを追加
-sys.path.append(str(Path(__file__).parent))
+project_root = Path(__file__).parent
+sys.path.insert(0, str(project_root))
 
 from utils.psd_tools.psd_split import extract_layers_from_psd
 from tools.pipeline import DatasetPipeline

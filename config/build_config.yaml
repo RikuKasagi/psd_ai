@@ -15,14 +15,15 @@ mask_integration:
   background_handling: "transparent"  # transparent, color
   background_color: [0, 0, 0]  # 背景色指定時
 
-# タイル分割設定
+# タイル分割設定（新仕様）
 tiling:
-  tile_size: 512  # 正方形タイルサイズ
-  overlap: 128    # オーバーラップピクセル数
-  stride: null    # 自動計算（tile_size - overlap）
+  tile_size: 512          # 正方形タイルサイズ
+  grid_size: [18, 5]       # [縦の分割数, 横の分割数]
+  overlap: 128            # オーバーラップピクセル数（片側）
+  auto_orient: true       # 横長画像を縦向きに変換
   padding:
-    mode: "constant"  # constant, reflect, symmetric
-    value: 0         # パディング値
+    mode: "constant"      # constant, reflect, symmetric
+    value: 0             # パディング値
   min_foreground_ratio: 0.0  # 前景ピクセル最小比率（0.0=全タイル保持）
 
 # データ分割設定
